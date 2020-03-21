@@ -1,0 +1,4 @@
+/.idea/*
+/venv/*
+main.py
+parse_tululu_category.py
