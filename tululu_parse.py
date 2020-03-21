@@ -16,8 +16,8 @@ def checking_the_status(response):
 
 def get_args_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start_page', default=2, type=int)
-    parser.add_argument('--end_page', default=3, type=int)
+    parser.add_argument('--start_page', default=1, type=int)
+    parser.add_argument('--end_page', default=701, type=int)
     parser.add_argument('--dest_folder', default='parse_tululu')
     parser.add_argument('--skip_imgs', action='store_true', default=True, help='Булевое значение True или False')
     parser.add_argument('--skip_txt', action='store_true', default=True, help='Булевое значение True или False')
