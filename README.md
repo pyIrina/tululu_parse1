@@ -46,4 +46,4 @@
 * ./parse_tululu/comment
      * id.txt
 
-* ./parse_tululu/description_of_books.json
+* ./parse_tululu/books.json
