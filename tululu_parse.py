@@ -5,25 +5,21 @@ import json
 import argparse
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-URL = 'http://tululu.org'
+URL = 'http://tululu.org/l55/'
 
 
-def get_status(url, response):
-    try:
-        response.raise_for_status()
-    except requests.HTTPError as e:
-        if e.response.status_code == 404:
-            return
-        else:
-            print('Ошибка при загрузке страницы: ' + str(url))
-            return
-    return response.text
+def get_response_text(response):
+    if response.status_code == 200:
+        return response.text
+    else:
+        print(f'Ошибка при загрузке страницы: {response.request.url}')
+        return
 
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start_page', default=2, type=int)
-    parser.add_argument('--end_page', default=3, type=int)
+    parser.add_argument('--start_page', default=1, type=int)
+    parser.add_argument('--end_page', default=701, type=int)
     parser.add_argument('--dest_folder', default='parse_tululu')
     parser.add_argument('--skip_imgs', action='store_true', default=True, help='Булевое значение True или False')
     parser.add_argument('--skip_txt', action='store_true', default=True, help='Булевое значение True или False')
@@ -31,18 +27,18 @@ def get_parser():
     return parser
 
 
-def create_or_update_folder(folder, args):
+def make_dirs(folder, args):
     path = os.path.join(args.dest_folder, folder)
     os.makedirs(path, exist_ok=True)
     return path
 
 
 def download_txt(url, args, name_book):
-    folder = create_or_update_folder('books', args)
+    folder = make_dirs('books', args)
     url = urljoin(URL, url)
     response = requests.get(url)
-    status_code = get_status(url, response)
-    if not status_code:
+    response_text = get_response_text(response)
+    if not response_text:
         return
     path = os.path.join(folder, name_book)
     filepath = os.path.normpath(path)
@@ -52,11 +48,11 @@ def download_txt(url, args, name_book):
 
 
 def download_image(img_link, img, args):
-    folder = create_or_update_folder('images', args)
+    folder = make_dirs('images', args)
     url = urljoin(URL, img_link)
     response = requests.get(url)
-    status_code = get_status(url, response)
-    if not status_code:
+    response_text = get_response_text(response)
+    if not response_text:
         return
     path = os.path.join(folder, img)
     filepath = os.path.normpath(path)
@@ -66,7 +62,7 @@ def download_image(img_link, img, args):
 
 
 def download_comments(args, id_book, comments):
-    folder = create_or_update_folder('comments', args)
+    folder = make_dirs('comments', args)
     path = os.path.join(folder, f'{id_book}.txt')
     filepath = os.path.normpath(path)
     with open(filepath, 'wt', encoding='utf8') as file:
@@ -76,22 +72,21 @@ def download_comments(args, id_book, comments):
 
 def get_info_book(link_book, args):
     response = requests.get(link_book)
-    status_code = get_status(url, response)
-    if not status_code:
+    response_text = get_response_text(response)
+    if not response_text:
         return
     soup = BeautifulSoup(response.text, 'lxml')
-    selector = 'body table.tabs td.ow_px_td'
-    card_tag = soup.select_one(selector)
-    title_section = card_tag.find('h1').text.split('::')
+    card_tag = soup.select_one('body table.tabs td.ow_px_td')
+    title_section = card_tag.select_one('h1').text.split('::')
     title = [title_element.strip("\xa0 ") for title_element in title_section]
-    genres_section = card_tag.find('span', class_='d_book').find_all('a')
+    genres_section = card_tag.select_one('span.d_book').select('a')
     genres = [genres_element.text for genres_element in genres_section]
-    comments_section = card_tag.find_all('div', class_='texts')
-    comments = [comment_element.find('span', class_='black').text for comment_element in comments_section]
-    img_link = card_tag.find('img')['src']
+    comments_section = card_tag.select('div.texts')
+    comments = [comment_element.select_one('span.black').text for comment_element in comments_section]
+    img_link = card_tag.select_one('img')['src']
     img = img_link.split('/')[::-1][0]
-    tag_tr = card_tag.find('table', class_='d_book').find_all('tr')
-    tag_a_all = [tag_element_tr.find('td').find_all('a') for tag_element_tr in tag_tr]
+    tag_tr = card_tag.select_one('table.d_book').select('tr')
+    tag_a_all = [tag_element_tr.select_one('td').select('a') for tag_element_tr in tag_tr]
     tag_a = [tag_element for tag_element in tag_a_all if tag_element]
     name_book = ''
     for elem_a in tag_a:
@@ -99,7 +94,8 @@ def get_info_book(link_book, args):
             if tag.text == 'скачать txt':
                 link_txt = tag['href']
                 id_book = tag['href'].split('=')[::-1][0]
-                name_book = f'{id_book}. {sanitize_filename(title[0])}'
+                title_book = sanitize_filename(title[0])
+                name_book = f'{id_book}. {title_book}'
 
     file_path_txt = ''
     file_path_img = ''
@@ -125,10 +121,10 @@ if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
     for page in range(args.start_page, args.end_page):
-        url = f'{URL}/l55/{page}'
+        url = urljoin(URL, f'{page}')
         response = requests.get(url)
-        status_code = get_status(url, response)
-        if not status_code:
+        response_text = get_response_text(response)
+        if not response_text:
             continue
         if response.history:
             break
