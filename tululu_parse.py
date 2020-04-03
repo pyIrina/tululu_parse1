@@ -5,7 +5,7 @@ import json
 import argparse
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-URL = 'http://tululu.org/l55/'
+URL = 'http://tululu.org'
 
 
 def get_response_text(response):
@@ -19,7 +19,7 @@ def get_response_text(response):
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start_page', default=1, type=int)
-    parser.add_argument('--end_page', default=3, type=int)
+    parser.add_argument('--end_page', default=701, type=int)
     parser.add_argument('--dest_folder', default='parse_tululu')
     parser.add_argument('--skip_imgs', action='store_true', default=True, help='Булевое значение True или False')
     parser.add_argument('--skip_txt', action='store_true', default=True, help='Булевое значение True или False')
@@ -61,54 +61,51 @@ def download_image(img_link, img, args):
         return filepath
 
 
-def download_comments(args, id_book, comments):
+def download_comments(args, book_id, comments):
     folder = make_dirs('comments', args)
-    path = os.path.join(folder, f'{id_book}.txt')
+    path = os.path.join(folder, f'{book_id}.txt')
     filepath = os.path.normpath(path)
     with open(filepath, 'wt', encoding='utf8') as file:
         for line in comments:
             file.write('%s\n' % line)
 
 
-def get_info_book(link_book, args):
+def get_info_book(link_book, args, book_name=None, file_path_txt=None, file_path_img=None):
     response = requests.get(link_book)
     response_text = get_response_text(response)
     if not response_text:
         return
     soup = BeautifulSoup(response.text, 'lxml')
-    card_tag = soup.select_one('body table.tabs td.ow_px_td')
-    title_section = card_tag.select_one('h1').text.split('::')
-    title = [title_element.strip("\xa0 ") for title_element in title_section]
-    genres_section = card_tag.select_one('span.d_book').select('a')
-    genres = [genres_element.text for genres_element in genres_section]
-    comments_section = card_tag.select('div.texts')
-    comments = [comment_element.select_one('span.black').text for comment_element in comments_section]
-    img_link = card_tag.select_one('img')['src']
-    img = img_link.split('/')[::-1][0]
-    tag_tr = card_tag.select_one('table.d_book').select('tr')
+    tag_card = soup.select_one('body table.tabs td.ow_px_td')
+    section_titles = tag_card.select_one('h1').text.split('::')
+    titles = [title_element.strip("\xa0 ") for title_element in section_titles]
+    section_genres = tag_card.select_one('span.d_book').select('a')
+    genres = [genres_element.text for genres_element in section_genres]
+    section_comments = tag_card.select('div.texts')
+    comments = [comment_element.select_one('span.black').text for comment_element in section_comments]
+    img_link = tag_card.select_one('img')['src']
+    img_name = img_link.split('/')[::-1][0]
+    tag_tr = tag_card.select_one('table.d_book').select('tr')
     tag_a_all = [tag_element_tr.select_one('td').select('a') for tag_element_tr in tag_tr]
-    tag_a = [tag_element for tag_element in tag_a_all if tag_element]
-    name_book = ''
-    for elem_a in tag_a:
-        for tag in elem_a:
+    tags_a = [tag_element for tag_element in tag_a_all if tag_element]
+    for elems in tags_a:
+        for tag in elems:
             if tag.text == 'скачать txt':
-                link_txt = tag['href']
-                id_book = tag['href'].split('=')[::-1][0]
-                title_book = sanitize_filename(title[0])
-                name_book = f'{id_book}. {title_book}'
+                txt_link = tag['href']
+                book_id = tag['href'].split('=')[::-1][0]
+                book_title = sanitize_filename(titles[0])
+                book_name = f'{book_id}. {book_title}'
 
-    file_path_txt = ''
-    file_path_img = ''
-    if name_book and args.skip_txt:
-        file_path_txt = download_txt(link_txt, args, name_book)
-    if name_book and args.skip_imgs:
-        file_path_img = download_image(img_link, img, args)
-    if name_book:
-        download_comments(args, id_book, comments)
+    if book_name and args.skip_txt:
+        file_path_txt = download_txt(txt_link, args, book_name)
+    if book_name and args.skip_imgs:
+        file_path_img = download_image(img_link, img_name, args)
+    if book_name:
+        download_comments(args, book_id, comments)
 
     return {
-        'title': name_book,
-        'author': title[1],
+        'title': book_name,
+        'author': titles[1],
         'img_src': file_path_img,
         'book_path': file_path_txt,
         'comments': comments,
@@ -121,7 +118,7 @@ if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
     for page in range(args.start_page, args.end_page):
-        url = urljoin(URL, f'{page}')
+        url = urljoin(URL, f'/l55/{page}')
         response = requests.get(url)
         response_text = get_response_text(response)
         if not response_text:

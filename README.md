@@ -1,12 +1,63 @@
 # Парсер сайта - tululu.org
 
-Программа скачивает книги с сайта - [http://tululu.org/]: tululu.org.
-
+Программа скачивает книги с сайта - [tululu](https://tululu.org).
 Жанр - фантастика.
 
 ## Требования
 
 Должен быть установлен Python3 на Linux или Windows.
+
+#### Установка
+
+##### На Linux
+
+1.Откройте терминал и установите Python и git с помощью вашего пакетного менеджера: Arch/manjaro/antergos:
+
+```pacman -S git python --needed```
+
+Ubuntu/Debian/Deepin/any_apt_based:
+
+ ```apt install git python```
+
+Fedora:
+
+ ```yum install git python```
+ 
+2.Склонируйте репозиторий при помощи git и перейдите в папку:
+```
+git clone https://github.com/emez3siu/b0mb3r.github.io
+cd b0mb3r
+```
+
+3.Установите зависимости:
+
+```python -m pip install -r requirements.txt```
+
+4.Запустите ПО:
+
+```python tululu_parse.py```
+
+5.Если в вашем браузере не открылся веб-интерфейс, перейдите по ссылке в терминале.
+
+##### На Windows
+
+1.Установите Python версии не ниже 3.6, скачав установщик с официального сайта.
+
+2.Установите git для Windows, скачав его отсюда.
+
+3.Откройте командную строку и склонируйте репозиторий при помощи git и перейдите в папку:
+```
+git clone https://github.com/emez3siu/b0mb3r.github.io
+cd b0mb3r
+```
+
+4.Установите все необходимые библиотеки и запустите скрипт:
+```
+python -m pip install -r requirements.txt
+python tululu_parse.py
+```
+
+5.Если в вашем браузере не открылся веб-интерфейс, перейдите по ссылке в консоли.
 
 ## Запуск
 
