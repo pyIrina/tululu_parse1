@@ -5,8 +5,7 @@ import json
 import argparse
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-URL = 'http://tululu.org'
-
+URL = ''
 
 def get_response_text(response):
     if response.status_code == 200:
@@ -19,7 +18,7 @@ def get_response_text(response):
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start_page', default=1, type=int)
-    parser.add_argument('--end_page', default=701, type=int)
+    parser.add_argument('--end_page', default=2, type=int)
     parser.add_argument('--dest_folder', default='parse_tululu')
     parser.add_argument('--skip_imgs', action='store_true', default=True, help='Булевое значение True или False')
     parser.add_argument('--skip_txt', action='store_true', default=True, help='Булевое значение True или False')
@@ -33,9 +32,9 @@ def make_dirs(folder, args):
     return path
 
 
-def download_txt(url, args, name_book):
+def download_txt(book_url, txt_link, args, name_book):
     folder = make_dirs('books', args)
-    url = urljoin(URL, url)
+    url = urljoin(book_url, txt_link)
     response = requests.get(url)
     response_text = get_response_text(response)
     if not response_text:
@@ -47,9 +46,9 @@ def download_txt(url, args, name_book):
         return filepath
 
 
-def download_image(img_link, img, args):
+def download_image(book_url, img_link, img, args):
     folder = make_dirs('images', args)
-    url = urljoin(URL, img_link)
+    url = urljoin(book_url, img_link)
     response = requests.get(url)
     response_text = get_response_text(response)
     if not response_text:
@@ -70,8 +69,8 @@ def download_comments(args, book_id, comments):
             file.write('%s\n' % line)
 
 
-def get_info_book(link_book, args, book_name=None, file_path_txt=None, file_path_img=None):
-    response = requests.get(link_book)
+def get_info_book(url, args, book_name=None, file_path_txt=None, file_path_img=None):
+    response = requests.get(url)
     response_text = get_response_text(response)
     if not response_text:
         return
@@ -97,9 +96,9 @@ def get_info_book(link_book, args, book_name=None, file_path_txt=None, file_path
                 book_name = f'{book_id}. {book_title}'
 
     if book_name and args.skip_txt:
-        file_path_txt = download_txt(txt_link, args, book_name)
+        file_path_txt = download_txt(url, txt_link, args, book_name)
     if book_name and args.skip_imgs:
-        file_path_img = download_image(img_link, img_name, args)
+        file_path_img = download_image(url, img_link, img_name, args)
     if book_name:
         download_comments(args, book_id, comments)
 
@@ -118,7 +117,7 @@ if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
     for page in range(args.start_page, args.end_page):
-        url = urljoin(URL, f'/l55/{page}')
+        url = urljoin('http://tululu.org/l55/', f'{page}')
         response = requests.get(url)
         response_text = get_response_text(response)
         if not response_text:
@@ -129,7 +128,7 @@ if __name__ == '__main__':
         selector = "body table.tabs td.ow_px_td table.d_book"
         books_cards = soup.select(selector)
         for book_card in books_cards:
-            link_book = urljoin(URL, book_card.find('a').get('href'))
+            link_book = urljoin(url, book_card.find('a').get('href'))
             info_book = get_info_book(link_book, args)
             books.append(info_book)
     filepath = os.path.join(args.dest_folder, args.json_path)
