@@ -15,14 +15,18 @@
 
 <nav aria-label="Page navigation example">
     <ul class="pagination justify-content-center">
-        {% if page != 1 %}
-          <li class="page-item"><a class="page-link" href="../pages/index{{page-1}}.html">Предыдущая</a></li>
+        {% if page <= 2 %}
+          <li class="page-item"><a class="page-link" href="../pages/index.html">Предыдущая</a></li>
         {% else %}
-          <li class="page-item"><a class="page-link" href="../pages/index{{page}}.html">Предыдущая</a></li>
+          <li class="page-item"><a class="page-link" href="../pages/index{{page-1}}.html">Предыдущая</a></li>
         {% endif %}
-        {% for page_number in range(1, paginate_by+1) %}
-        <li class="page-item {% if  page_number == page  %} active{% endif %}">
-          <a class="page-link" href="../pages/index{{page_number}}.html">{{page_number}}</a>
+        {% for page_number in range(paginate_by) %}
+        <li class="page-item {% if  page_number + 1 == page  %} active{% endif %}">
+          {% if page_number == 0 %}
+            <a class="page-link" href="../pages/index.html">1</a>
+          {% else %}
+            <a class="page-link" href="../pages/index{{page_number+1}}.html">{{page_number+1}}</a>
+          {% endif %}
         </li>
         {% endfor %}
         {% if page != paginate_by %}

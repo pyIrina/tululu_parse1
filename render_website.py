@@ -24,7 +24,11 @@ def create_index_html(page=1):
             page=page,
             paginate_by=paginate_by
         )
-        with open(f'pages/index{page}.html', 'w', encoding="utf8") as file:
+        if page == 1:
+            filepath = f'pages/index.html'
+        else:
+            filepath = f'pages/index{page}.html'
+        with open(filepath, 'w', encoding="utf8") as file:
             file.write(rendered_page)
         page += 1
 
