@@ -1,0 +1,5 @@
+jinja2
+requests==2.23.0
+pathvalidate==2.2.0
+bs4==4.8.2
+lxml==4.5.0
