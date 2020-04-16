@@ -18,7 +18,7 @@ def create_index_html(page=1):
 
     for i in range(1, len(books), 10):
         books_info = books[i:i + 10]
-        paginate_by = math.ceil(len(books)/10)
+        paginate_by = math.ceil(len(books) / 10)
         rendered_page = template.render(
             books_info=books_info,
             page=page,
@@ -32,6 +32,7 @@ def create_index_html(page=1):
             file.write(rendered_page)
         page += 1
 
+
 def on_reload(port=5500):
     server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
     server.serve_forever()
@@ -40,11 +41,9 @@ def on_reload(port=5500):
     # server.serve(port=port)
 
 
-
 def main():
     create_index_html()
     on_reload()
-
 
 
 if __name__ == "__main__":

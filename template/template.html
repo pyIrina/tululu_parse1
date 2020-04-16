@@ -1,55 +1,58 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <title>Books</title>
+    <link rel="icon" type="image/png" href="../template/favicon.ico" sizes="16x16">
+    <title>Библиотека книг</title>
 </head>
 <body>
 
 <nav aria-label="Page navigation example">
-    <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-center p-2">
         {% if page <= 2 %}
-          <li class="page-item"><a class="page-link" href="../pages/index.html">Предыдущая</a></li>
+        <li class="page-item {% if  page == 1  %} disabled {% endif %}"><a class="page-link" href="../pages/index.html">Предыдущая</a>
+        </li>
         {% else %}
-          <li class="page-item"><a class="page-link" href="../pages/index{{page-1}}.html">Предыдущая</a></li>
+        <li class="page-item"><a class="page-link" href="../pages/index{{page-1}}.html">Предыдущая</a></li>
         {% endif %}
         {% for page_number in range(paginate_by) %}
         <li class="page-item {% if  page_number + 1 == page  %} active{% endif %}">
-          {% if page_number == 0 %}
+            {% if page_number == 0 %}
             <a class="page-link" href="../pages/index.html">1</a>
-          {% else %}
+            {% else %}
             <a class="page-link" href="../pages/index{{page_number+1}}.html">{{page_number+1}}</a>
-          {% endif %}
+            {% endif %}
         </li>
         {% endfor %}
         {% if page != paginate_by %}
-          <li class="page-item"><a class="page-link" href="../pages/index{{page+1}}.html">Следующая</a></li>
+        <li class="page-item"><a class="page-link" href="../pages/index{{page+1}}.html">Следующая</a></li>
         {% else %}
-          <li class="page-item"><a class="page-link" href="../pages/index{{page}}.html">Следующая</a></li>
+        <li class="page-item {% if  page == paginate_by  %} disabled {% endif %}"><a class="page-link"
+                                                                                     href="../pages/index{{page}}.html">Следующая</a>
+        </li>
         {% endif %}
     </ul>
 </nav>
 <div class="container">
-    <div class="row">
+    <div class=" row">
+    </div>
+    <div class=" row">
         {% for line in books_info %}
-        <div class="col-sm-6" style="max-width: 540px;">
+        <div class="col-sm-6 my-2 border p-2 mr-3" style="max-width: 540px;">
             <div class="row no-gutters">
                 <div class="col-md-4">
-                    <img src="..\{{line['img_src']}}" class="card-img" alt="...">
+                    <img src="..\{{line['img_src']}}" class="card-img" alt="{{line['title']}}">
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
                         <h5 class="card-title">{{line['title']}}</h5>
                         <p class="card-text">{{line['author']}}</p>
                         {% for genre in line['genres'] %}
-                          <span class="badge badge-light">{{genre}}</span>
+                        <span class="badge badge-light">{{genre}}</span>
                         {% endfor %}
                         <br>
                         <br>
@@ -64,8 +67,7 @@
         {% endfor %}
     </div>
 </div>
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>

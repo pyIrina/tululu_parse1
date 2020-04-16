@@ -96,12 +96,13 @@ def get_info_book(url, args, book_name=None, file_path_txt=None, file_path_img=N
                 # book_name = f'{book_id}. {book_title}'
                 book_name = book_title
 
-    if book_name and args.skip_txt:
+    if book_name is None:
+        return
+    if args.skip_txt:
         file_path_txt = download_txt(url, txt_link, args, book_name)
-    if book_name and args.skip_imgs:
+    if args.skip_imgs:
         file_path_img = download_image(url, img_link, img_name, args)
-    if book_name:
-        download_comments(args, book_id, comments)
+    download_comments(args, book_id, comments)
 
     return {
         'title': book_name,
@@ -130,8 +131,11 @@ if __name__ == '__main__':
         books_cards = soup.select(selector)
         for book_card in books_cards:
             link_book = urljoin(url, book_card.find('a').get('href'))
+            # link_book = 'http://tululu.org/b8467/'
+            # link_book = 'http://tululu.org/b8283/'
             info_book = get_info_book(link_book, args)
-            books.append(info_book)
+            if info_book:
+                books.append(info_book)
     filepath = os.path.join(args.dest_folder, args.json_path)
     with open(filepath, 'w',encoding='utf-8') as file:
         json.dump(books, file, ensure_ascii=False, sort_keys=True, indent=4)
