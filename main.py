@@ -131,8 +131,6 @@ if __name__ == '__main__':
         books_cards = soup.select(selector)
         for book_card in books_cards:
             link_book = urljoin(url, book_card.find('a').get('href'))
-            # link_book = 'http://tululu.org/b8467/'
-            # link_book = 'http://tululu.org/b8283/'
             info_book = get_info_book(link_book, args)
             if info_book:
                 books.append(info_book)
